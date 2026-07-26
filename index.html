@@ -4,105 +4,273 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dropbox Matter Filer</title>
-<meta name="description" content="File Outlook emails into the right Dropbox matter folder, with a notes-doc entry — in a couple of clicks.">
+<meta name="description" content="Drag an email out of Outlook and file it to the right Dropbox matter — as a PDF in the Communications folder, with a dated line in the notes doc. You review and confirm; nothing files on its own.">
 <style>
-  :root { --navy:#1F3864; --ink:#1a1a1a; --muted:#5a6472; --bg:#f6f8fc; --card:#fff; }
-  * { box-sizing: border-box; }
-  body { margin:0; font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;
-         color:var(--ink); background:var(--bg); }
-  a { color:var(--navy); }
-  .wrap { max-width:820px; margin:0 auto; padding:0 20px; }
-  header { background:linear-gradient(160deg,#22407a,#1F3864); color:#fff; padding:64px 0 56px; }
-  header h1 { margin:0 0 8px; font-size:2.2rem; letter-spacing:-.02em; }
-  header p { margin:0; font-size:1.15rem; color:#d7e0f4; max-width:38rem; }
-  .btn { display:inline-block; margin-top:26px; background:#fff; color:var(--navy);
-         font-weight:700; padding:14px 26px; border-radius:10px; text-decoration:none;
-         box-shadow:0 6px 20px rgba(0,0,0,.18); }
-  .btn:hover { transform:translateY(-1px); }
-  .sub { display:block; margin-top:10px; font-size:.9rem; color:#c2cef0; }
-  .sub a { color:#fff; }
-  section { padding:38px 0; border-bottom:1px solid #e6ebf4; }
-  section:last-of-type { border-bottom:0; }
-  h2 { color:var(--navy); font-size:1.3rem; margin:0 0 14px; }
-  ol,ul { padding-left:1.25rem; } li { margin:6px 0; }
-  .card { background:var(--card); border:1px solid #e6ebf4; border-radius:12px;
-          padding:18px 20px; margin:14px 0; }
-  code, kbd { background:#eef1f7; padding:1px 6px; border-radius:5px;
-              font-family:ui-monospace,Menlo,monospace; font-size:.92em; }
-  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  @media (max-width:640px){ .grid{ grid-template-columns:1fr; } header{padding:44px 0;} }
-  footer { color:var(--muted); font-size:.85rem; padding:28px 0 44px; }
-  .req li { margin:4px 0; }
+  :root{
+    --ink:#16233d;         /* deep legal ink */
+    --ink-soft:#33415c;
+    --paper:#e9ebee;       /* cool file-room gray (not warm cream) */
+    --paper-2:#f3f4f6;
+    --card:#ffffff;
+    --manila:#d8b06a;      /* folder tab — the one bold accent */
+    --manila-edge:#b7893f;
+    --stamp:#8a3a2e;       /* oxblood date-stamp */
+    --filed:#2f6b4f;
+    --rule:#d2d7de;
+    --muted:#505a6b;       /* AA-legible for the small mono labels on --paper */
+    --mono:ui-monospace,"SF Mono",Menlo,"Cascadia Mono",monospace;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font:400 17px/1.65 var(--sans); -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--ink)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+
+  /* ---- eyebrow / mono utility ---- */
+  .eyebrow{
+    font:600 12px/1 var(--mono); letter-spacing:.18em; text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* ---- docket bar (file header) ---- */
+  .docket{border-bottom:1px solid var(--rule);background:var(--paper-2)}
+  .docket__row{display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;font:600 11.5px/1 var(--mono);letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink-soft)}
+  .docket__row .dot{color:var(--manila-edge)}
+  @media(max-width:560px){.docket__row span.hideSm{display:none}}
+
+  /* ---- hero ---- */
+  .hero{padding:72px 0 40px}
+  .hero__grid{display:grid;grid-template-columns:1.05fr .95fr;gap:52px;align-items:center}
+  .hero h1{
+    font:500 clamp(2.35rem,5.2vw,3.5rem)/1.05 var(--serif);
+    letter-spacing:-.015em;margin:.5rem 0 .9rem;
+  }
+  .hero h1 em{font-style:italic;color:var(--ink-soft)}
+  .lede{font-size:1.14rem;color:var(--ink-soft);max-width:34rem;margin:0 0 1.6rem}
+  .cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px}
+  .btn{
+    display:inline-flex;align-items:center;gap:.55em;background:var(--ink);color:#fff;
+    font:600 1rem var(--sans);text-decoration:none;padding:15px 26px;border-radius:10px;
+    box-shadow:0 8px 22px -8px rgba(22,35,61,.55);transition:transform .15s,box-shadow .15s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px -10px rgba(22,35,61,.55)}
+  .btn svg{width:17px;height:17px;fill:currentColor}
+  .cta-note{font:500 12.5px/1.4 var(--mono);letter-spacing:.03em;color:var(--muted)}
+  .cta-note a{color:var(--ink-soft)}
+
+  /* ---- signature: the filed-document card ---- */
+  .filecard{
+    position:relative;background:var(--card);border:1px solid var(--rule);
+    border-radius:12px;padding:30px 24px 22px;
+    box-shadow:0 1px 0 var(--rule),0 26px 50px -28px rgba(22,35,61,.42);
+  }
+  .filecard__tab{
+    position:absolute;top:-19px;left:26px;background:var(--manila);color:#3a2c10;
+    border:1px solid var(--manila-edge);border-bottom:none;border-radius:9px 9px 0 0;
+    padding:7px 15px 8px;font:600 11.5px/1 var(--mono);letter-spacing:.06em;
+    box-shadow:0 -1px 0 rgba(255,255,255,.4) inset;
+  }
+  .filecard__dest{
+    display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:14px;
+  }
+  .filecard__dest b{font:500 1.05rem var(--serif)}
+  .filecard__dest span{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .artifact-label{font:600 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 5px}
+  .pdfname{
+    font:500 13px/1.5 var(--mono);color:var(--ink);background:var(--paper-2);
+    border:1px solid var(--rule);border-radius:7px;padding:9px 11px;word-break:break-word;
+  }
+  .pdfname .pg{color:var(--muted)}
+  .logline{margin-top:16px}
+  .logline pre{
+    margin:0;font:500 12.5px/1.7 var(--mono);color:var(--ink-soft);white-space:pre-wrap;
+    border-left:2px solid var(--manila);padding-left:12px;
+  }
+  .logline .dt{color:var(--ink);font-weight:600}
+  .stamp{
+    position:absolute;top:16px;right:16px;color:var(--stamp);
+    border:2.5px solid var(--stamp);border-radius:6px;padding:3px 9px 2px;
+    font:800 13px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+    transform:rotate(-8deg);opacity:.62;
+  }
+  .stamp small{display:block;font-size:8px;letter-spacing:.1em;font-weight:600;text-align:center;margin-top:2px;opacity:.85}
+
+  /* ---- section frame ---- */
+  section.band{padding:52px 0;border-top:1px solid var(--rule)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin:0 0 26px}
+  .sec-head h2{font:500 1.65rem var(--serif);letter-spacing:-.01em;margin:0}
+  .sec-head .n{font:600 12px var(--mono);color:var(--manila-edge);letter-spacing:.1em}
+
+  /* ---- steps (a real ordered process) ---- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);
+    border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+  .step{background:var(--card);padding:24px 22px}
+  .step__k{font:700 12px var(--mono);letter-spacing:.12em;color:var(--manila-edge)}
+  .step h3{font:500 1.2rem var(--serif);margin:.5rem 0 .35rem}
+  .step p{margin:0;color:var(--ink-soft);font-size:.98rem}
+
+  /* ---- two-column info ---- */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+  .cols h3{font:500 1.15rem var(--serif);margin:0 0 .6rem}
+  .list{margin:0;padding:0;list-style:none}
+  .list li{position:relative;padding:9px 0 9px 26px;border-bottom:1px solid var(--rule);color:var(--ink-soft)}
+  .list li:last-child{border-bottom:none}
+  .list li::before{content:"";position:absolute;left:2px;top:16px;width:9px;height:9px;
+    border:1.5px solid var(--manila-edge);border-radius:2px}
+  ol.steps-ol{margin:0;padding-left:1.2rem;color:var(--ink-soft)}
+  ol.steps-ol li{margin:10px 0}
+  code{font:500 .92em var(--mono);background:var(--paper-2);border:1px solid var(--rule);
+    padding:1px 6px;border-radius:5px;color:var(--ink)}
+
+  /* ---- footer ---- */
+  footer{border-top:1px solid var(--rule);background:var(--paper-2)}
+  .foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:22px 0 34px;font:500 12px var(--mono);letter-spacing:.06em;color:var(--muted)}
+
+  a:focus-visible,.btn:focus-visible{outline:2.5px solid var(--stamp);outline-offset:3px;border-radius:6px}
+
+  /* ---- responsive ---- */
+  @media(max-width:860px){
+    .hero__grid{grid-template-columns:1fr;gap:40px}
+    .steps{grid-template-columns:1fr}
+    .cols{grid-template-columns:1fr;gap:30px}
+  }
+
+  /* Motion is limited to the button hover lift (see .btn); content never depends on
+     animation to be visible — safer for first paint, no-JS, and slow connections. */
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <h1>Dropbox Matter Filer</h1>
-    <p>Drag an email out of Outlook and file it into the right Dropbox matter folder
-       as a PDF, with a dated entry in the matter's notes doc — reviewed and confirmed
-       in your browser.</p>
-    <a class="btn" href="https://github.com/cdkovacs/matter-filer-releases/releases/latest/download/DropboxMatterFiler.pkg">
-      Download for macOS</a>
-    <span class="sub">Universal (Apple Silicon &amp; Intel) ·
-      <a href="https://github.com/cdkovacs/matter-filer-releases/releases">all versions &amp; release notes</a></span>
+
+<div class="docket">
+  <div class="wrap docket__row">
+    <span>Dropbox Matter Filer <span class="dot">·</span> Correspondence filing</span>
+    <span class="hideSm">macOS 12+ <span class="dot">·</span> signed &amp; notarized</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap hero__grid">
+    <div>
+      <p class="eyebrow rise">For the firm's attorneys</p>
+      <h1 class="rise d1">Every email, filed to the&nbsp;right&nbsp;<em>matter</em>.</h1>
+      <p class="lede rise d2">Drag a message out of Outlook. It's saved as a PDF in that
+        matter's Communications folder and a dated line is added to the notes doc — after
+        you review and confirm. Nothing files on its own.</p>
+      <div class="cta-row rise d3">
+        <a class="btn" href="https://github.com/cdkovacs/matter-filer-releases/releases/latest/download/DropboxMatterFiler.pkg">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a1 1 0 0 1 1 1v6.6l2.3-2.3 1.4 1.4L8 12.4 3.3 7.7l1.4-1.4L7 8.6V2a1 1 0 0 1 1-1ZM3 13h10v2H3z"/></svg>
+          Download for macOS
+        </a>
+        <span class="cta-note">Universal · Apple&nbsp;Silicon &amp;&nbsp;Intel<br>
+          <a href="https://github.com/cdkovacs/matter-filer-releases/releases">All versions &amp; notes →</a></span>
+      </div>
+    </div>
+
+    <!-- signature: the filed document the app produces -->
+    <div class="filecard rise d2" role="img"
+         aria-label="Example of what filing produces: a PDF named in the firm convention and a dated notes-doc entry.">
+      <span class="filecard__tab">SMITH, Johnny · 2025–2026</span>
+      <div class="stamp">Filed<small>12/01/2024</small></div>
+      <div class="filecard__dest"><b>Communications</b></div>
+      <p class="artifact-label">Saved as</p>
+      <div class="pdfname">SMITH, Johnny 2024 12 01 Email, CSE to Parent,
+        re- IEP Meeting Notice, <span class="pg">1p.pdf</span></div>
+      <div class="logline">
+        <p class="artifact-label">Appended to the notes doc</p>
+        <pre><span class="dt">12/01/2024  AK</span>  Email received from CSE Team
+Summary: CSE meeting set for next Tuesday at 10am;
+bring the latest evaluations to discuss IEP goals.</pre>
+      </div>
+    </div>
   </div>
 </header>
 
-<div class="wrap">
-
-  <section>
-    <h2>Requirements</h2>
-    <ul class="req">
-      <li>macOS 12 (Monterey) or later — Apple Silicon or Intel.</li>
-      <li>Microsoft Outlook and Google Chrome installed.</li>
-      <li>A Dropbox account with access to the firm's matter folders.</li>
-    </ul>
-  </section>
-
-  <section>
-    <h2>Install</h2>
-    <ol>
-      <li>Download the installer above and double-click it. It's signed and notarized,
-        so it opens without Gatekeeper warnings.</li>
-      <li>Follow the installer. It sets up a background helper and a review screen at
-        <code>http://127.0.0.1:8765</code>, and creates a <b>Matter Filer</b> folder in
-        your home folder.</li>
-      <li>Open <a href="http://127.0.0.1:8765">http://127.0.0.1:8765</a> and click
-        <b>Connect Dropbox</b> once to authorize your own account.</li>
-    </ol>
-  </section>
-
-  <section>
-    <h2>Everyday use</h2>
-    <div class="grid">
-      <div class="card"><b>1. Drag</b><br>Drag an email from Outlook into
-        <b>Matter&nbsp;Filer&nbsp;›&nbsp;Inbox</b> in your home folder.</div>
-      <div class="card"><b>2. Review</b><br>Open the review screen. The matter is
-        pre-selected; adjust the name, summary, or matter if needed.</div>
-      <div class="card"><b>3. File</b><br>Click <b>File selected</b>. The PDF goes to the
-        matter's Communications folder and a dated entry is appended to its notes doc.</div>
-      <div class="card"><b>New matter?</b><br>Pick <b>＋ New matter</b> and browse your
-        Dropbox to the matter's notes doc. Nothing files until you confirm.</div>
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head"><span class="n">01</span><h2>How a filing goes</h2></div>
+    <div class="steps">
+      <div class="step">
+        <div class="step__k">DRAG</div>
+        <h3>Out of Outlook</h3>
+        <p>Drag the message into the <b>Matter&nbsp;Filer › Inbox</b> folder in your home folder.</p>
+      </div>
+      <div class="step">
+        <div class="step__k">REVIEW</div>
+        <h3>Confirm the matter</h3>
+        <p>Open the review screen. The matter is pre-selected; adjust the name, summary, or
+          matter if it's wrong.</p>
+      </div>
+      <div class="step">
+        <div class="step__k">FILE</div>
+        <h3>One click</h3>
+        <p>Click <b>File&nbsp;selected</b>. The PDF lands in Communications and the dated
+          line is added to the notes doc.</p>
+      </div>
     </div>
-    <p>The <b>⚙ Settings</b> and <b>🗂 Matters ledger</b> links in the review screen let you
-      adjust preferences and edit the matter registry.</p>
-  </section>
+  </div>
+</section>
 
-  <section>
-    <h2>Notes</h2>
-    <ul>
-      <li>Your matters, the queue, and backups live in <code>~/Matter Filer/</code> and are
-        never overwritten by an update.</li>
-      <li>Email content is summarized on-device; nothing is sent to a cloud AI service.</li>
-      <li>Updating is just installing a newer version — your data is preserved.</li>
-    </ul>
-  </section>
+<section class="band">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <div class="sec-head"><span class="n">02</span><h2>Install</h2></div>
+        <ol class="steps-ol">
+          <li>Download the installer and double-click it. It's signed and notarized, so it
+            opens without Gatekeeper warnings.</li>
+          <li>Follow the installer. It starts a background helper and a review screen at
+            <code>127.0.0.1:8765</code>, and creates a <b>Matter Filer</b> folder in your
+            home folder.</li>
+          <li>Open the review screen and click <b>Connect Dropbox</b> once to authorize your
+            own account.</li>
+        </ol>
+      </div>
+      <div>
+        <div class="sec-head"><span class="n">03</span><h2>Requirements</h2></div>
+        <ul class="list">
+          <li>macOS 12 (Monterey) or later — Apple Silicon or Intel.</li>
+          <li>Microsoft Outlook and Google Chrome installed.</li>
+          <li>A Dropbox account with access to the firm's matter folders.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <footer class="wrap">
-    Dropbox Matter Filer · built for The&nbsp;firm's special-education practice.
-    Questions? Contact your administrator.
-  </footer>
-</div>
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head"><span class="n">04</span><h2>Good to know</h2></div>
+    <div class="cols">
+      <ul class="list">
+        <li>Your matters, the review queue, and backups live in <code>~/Matter Filer/</code>
+          and are never overwritten by an update.</li>
+        <li>Email content is summarized on your Mac — nothing is sent to a cloud AI service.</li>
+      </ul>
+      <ul class="list">
+        <li>Updating is just installing a newer version; your data carries over.</li>
+        <li>New matter? Browse your Dropbox to its notes doc — the app remembers it by a
+          stable file ID, so renaming folders won't break filing.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <span>Dropbox Matter Filer</span>
+    <span>Questions → your administrator</span>
+  </div>
+</footer>
+
 </body>
 </html>
