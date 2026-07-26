@@ -138,6 +138,13 @@
   a:focus-visible,.btn:focus-visible{outline:2.5px solid var(--stamp);outline-offset:3px;border-radius:6px}
 
   /* ---- responsive ---- */
+  /* ---- product shot ---- */
+  .shotcap{color:var(--ink-soft);font-size:1.05rem;max-width:40rem;margin:0 0 20px}
+  .shotcap code{font-size:.9em}
+  .shot{margin:0;border:1px solid var(--rule);border-radius:12px;overflow:hidden;
+    background:var(--card);box-shadow:0 34px 66px -36px rgba(22,35,61,.5)}
+  .shot img{display:block;width:100%;height:auto}
+
   @media(max-width:860px){
     .hero__grid{grid-template-columns:1fr;gap:40px}
     .steps{grid-template-columns:1fr}
@@ -194,6 +201,19 @@ bring the latest evaluations to discuss IEP goals.</pre>
     </div>
   </div>
 </header>
+
+<section class="band">
+  <div class="wrap">
+    <p class="eyebrow" style="margin-bottom:12px">The review screen</p>
+    <p class="shotcap">It all happens in one local screen at <code>127.0.0.1:8765</code>.
+      Each email arrives with its matter already picked and a filename built in the firm's
+      convention. You glance, adjust anything that's off, and file.</p>
+    <figure class="shot">
+      <img src="screenshot-queue.png" width="1280" height="600"
+           alt="The review queue: a staged email with its matter pre-selected, an editable firm-format filename, and a notes summary.">
+    </figure>
+  </div>
+</section>
 
 <section class="band">
   <div class="wrap">
