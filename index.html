@@ -71,6 +71,7 @@
   .cta-note a{color:var(--ink-soft)}
   .verbadge{display:inline-block;margin-right:8px;padding:1px 8px 2px;border:1px solid var(--manila-edge);
     border-radius:999px;background:var(--card);color:var(--ink);font-weight:700}
+  .verbadge[hidden]{display:none}
 
   /* ---- signature: the filed-document card ---- */
   .filecard{
@@ -145,10 +146,13 @@
     transition:border-color .15s,background .15s}
   .btn-quiet:hover{border-color:var(--manila-edge);background:#faf5e9}
 
-  /* ---- footer ---- */
-  footer{border-top:1px solid var(--rule);background:var(--paper-2)}
-  .foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
-    padding:22px 0 34px;font:500 12px var(--mono);letter-spacing:.06em;color:var(--muted)}
+  /* ---- footer (floats on the bottom of the window) ---- */
+  footer{position:fixed;left:0;right:0;bottom:0;z-index:40;
+    border-top:1px solid var(--rule);background:var(--paper-2)}
+  .foot{display:flex;justify-content:space-between;gap:4px 16px;flex-wrap:wrap;
+    padding:11px 0 13px;font:500 12px var(--mono);letter-spacing:.06em;color:var(--muted)}
+  body{padding-bottom:64px}
+  @media(max-width:700px){body{padding-bottom:118px}}
 
   a:focus-visible,.btn:focus-visible{outline:2.5px solid var(--stamp);outline-offset:3px;border-radius:6px}
 
@@ -359,7 +363,7 @@ bring the latest evaluations to discuss IEP goals.</pre>
   <div class="wrap foot">
     <span>Dropbox Matter Filer</span>
     <span>© 2026 Angie's Husband. All rights reserved.</span>
-    <span>Questions → your administrator</span>
+    <span>Questions → <a href="mailto:akovacs@cuddylawfirm.com">akovacs@cuddylawfirm.com</a></span>
   </div>
 </footer>
 
