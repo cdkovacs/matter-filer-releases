@@ -135,6 +135,14 @@
   code{font:500 .92em var(--mono);background:var(--paper-2);border:1px solid var(--rule);
     padding:1px 6px;border-radius:5px;color:var(--ink)}
 
+  /* ---- feedback ---- */
+  .fb__p{color:var(--ink-soft);font-size:1.05rem;max-width:36rem;margin:0 0 1.4rem}
+  .btn-quiet{display:inline-flex;align-items:center;gap:.55em;background:var(--card);
+    color:var(--ink);border:1px solid var(--rule);font:600 .98rem var(--sans);
+    text-decoration:none;padding:13px 24px;border-radius:10px;
+    transition:border-color .15s,background .15s}
+  .btn-quiet:hover{border-color:var(--manila-edge);background:#faf5e9}
+
   /* ---- footer ---- */
   footer{border-top:1px solid var(--rule);background:var(--paper-2)}
   .foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
@@ -333,9 +341,21 @@ bring the latest evaluations to discuss IEP goals.</pre>
   </div>
 </section>
 
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head"><span class="n">05</span><h2>Something off? Tell us.</h2></div>
+    <p class="fb__p">The filer is in beta. If an email filed to the wrong matter, a name
+      came out wrong, or anything looks off, two minutes of detail helps us fix it for
+      the whole firm.</p>
+    <a class="btn-quiet" href="https://forms.cloud.microsoft/r/QWXEytS5eQ"
+       target="_blank" rel="noopener">Report a bug or send feedback →</a>
+  </div>
+</section>
+
 <footer>
   <div class="wrap foot">
     <span>Dropbox Matter Filer</span>
+    <span>© 2026 Angie's Husband. All rights reserved.</span>
     <span>Questions → your administrator</span>
   </div>
 </footer>
