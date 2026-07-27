@@ -69,6 +69,8 @@
   .btn svg{width:17px;height:17px;fill:currentColor}
   .cta-note{font:500 12.5px/1.4 var(--mono);letter-spacing:.03em;color:var(--muted)}
   .cta-note a{color:var(--ink-soft)}
+  .verbadge{display:inline-block;margin-right:8px;padding:1px 8px 2px;border:1px solid var(--manila-edge);
+    border-radius:999px;background:var(--card);color:var(--ink);font-weight:700}
 
   /* ---- signature: the filed-document card ---- */
   .filecard{
@@ -205,7 +207,8 @@
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a1 1 0 0 1 1 1v6.6l2.3-2.3 1.4 1.4L8 12.4 3.3 7.7l1.4-1.4L7 8.6V2a1 1 0 0 1 1-1ZM3 13h10v2H3z"/></svg>
           Download for macOS
         </a>
-        <span class="cta-note">Universal · Apple&nbsp;Silicon &amp;&nbsp;Intel · Beta — double-check
+        <span class="cta-note"><span id="verbadge" class="verbadge" hidden></span>Universal
+          · Apple&nbsp;Silicon &amp;&nbsp;Intel · Beta — double-check
           filings while we test<br>
           <a href="https://github.com/cdkovacs/matter-filer-releases/releases">All versions &amp; notes →</a></span>
       </div>
@@ -359,6 +362,21 @@ bring the latest evaluations to discuss IEP goals.</pre>
     <span>Questions → your administrator</span>
   </div>
 </footer>
+
+<script>
+/* Version badge: the latest release tag of the public releases repo. Static page
+   otherwise — if the API is unreachable or rate-limited the badge simply stays hidden. */
+fetch('https://api.github.com/repos/cdkovacs/matter-filer-releases/releases/latest')
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){
+    if (d && d.tag_name){
+      var el = document.getElementById('verbadge');
+      el.textContent = d.tag_name;
+      el.hidden = false;
+    }
+  })
+  .catch(function(){});
+</script>
 
 </body>
 </html>
